@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fun.crawl.mapper.NoteSysbookMapper">
+
+<!-- 通用查询映射结果 -->
+<resultMap id="BaseResultMap" type="com.fun.crawl.model.NoteSysbook">
+    <id column="id" property="id"/>
+        <result column="notebook_id" property="notebookId"/>
+      <result column="notebook_name" property="notebookName"/>
+      <result column="to_notebook_id" property="toNotebookId"/>
+      <result column="to_notebook_name" property="toNotebookName"/>
+      <result column="is_deleted" property="isDeleted"/>
+      <result column="create_time" property="createTime"/>
+  </resultMap>
+
+<!-- 通用查询结果列 -->
+<sql id="Base_Column_List">
+       id, notebook_id, notebook_name, to_notebook_id, to_notebook_name, is_deleted, create_time
+</sql>
+<select id="pageByQuery" resultMap="BaseResultMap">
+    select     id, notebook_id, notebook_name, to_notebook_id, to_notebook_name, is_deleted, create_time
+    from t_note_sysbook
+    <where>
+        <if test="id !=null and id!=''">
+           and id = #{ id}
+        </if>
+        <if test="notebookId !=null and notebookId!=''">
+           and notebook_id = #{ notebookId}
+        </if>
+        <if test="notebookName !=null and notebookName!=''">
+           and notebook_name = #{ notebookName}
+        </if>
+        <if test="toNotebookId !=null and toNotebookId!=''">
+           and to_notebook_id = #{ toNotebookId}
+        </if>
+        <if test="toNotebookName !=null and toNotebookName!=''">
+           and to_notebook_name = #{ toNotebookName}
+        </if>
+        <if test="isDeleted !=null and isDeleted!=''">
+           and is_deleted = #{ isDeleted}
+        </if>
+        <if test="createTime !=null and createTime!=''">
+           and create_time = #{ createTime}
+        </if>
+    </where>
+</select>
+
+
+</mapper>

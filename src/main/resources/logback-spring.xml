@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="false">
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <jmxConfigurator/>
+
+    <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+    <property name="LOG_HOME" value="/mnt/log/"/>
+    <property name="PROJECT_NAME" value="know-who"/>
+
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!--
+        %d{HH: mm:ss.SSS}——日志输出时间
+        %thread——输出日志的进程名字，这在Web应用以及异步任务处理中很有用
+        %-5level——日志级别，并且使用5个字符靠左对齐
+        %logger{36}——日志输出者的名字
+        %msg——日志消息
+        %n——平台的换行符
+        maxHistory  值保留最近30天的日志
+        totalSizeCap 设置为1GB的话，那么到了这个值，就会删除旧的日志。
+    -->
+    <!-- 按照每天生成日志文件 -->
+    <!--输出到文件-->
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}${PROJECT_NAME}-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>20MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>5</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss:SSS} %contextName {%thread} %-5level %logger{36} - %msg%n</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    <!--打印sql日志-->
+    <logger name="com.fun.crawl.mapper" level="DEBUG"/>
+    <logger name=" com.github.binarywang.wxpay" level="DEBUG"/>
+
+
+
+    <!-- 日志输出级别 -->
+    <root level="INFO">
+        <!--<appender-ref ref="STDOUT" />-->
+        <appender-ref ref="file"/>
+
+    </root>
+
+    <!--&lt;!&ndash;测试环境:打印控制台&ndash;&gt;-->
+    <!--<springProfile name="test">-->
+    <!--&lt;!&ndash; 打印sql &ndash;&gt;-->
+    <!--<logger name="org.springframework.scheduling"  level="error" />-->
+    <!--<Logger name="org.apache.catalina.util.LifecycleBase" level="error" />-->
+    <!--<Logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />-->
+    <!--<Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" />-->
+    <!--<Logger name="org.springframework" level="debug" />-->
+    <!--<logger name="com.lzw" level="debug" />-->
+    <!--<logger name="org.mybatis" level="debug" />-->
+    <!--<logger name="java.sql" level="error" />-->
+    <!--<logger name="java.sql.Connection" level="error" />-->
+    <!--<logger name="java.sql.Statement" level="error" />-->
+    <!--<logger name="java.sql.PreparedStatement" level="error" />-->
+    <!--<logger name="java.sql.ResultSet" level="error" />-->
+    <!--<root level="info">-->
+    <!--<appender-ref ref="CONSOLE"/>-->
+    <!--</root>-->
+    <!--</springProfile>-->
+
+    <!--&lt;!&ndash;测试环境:打印控制台&ndash;&gt;-->
+    <!--<springProfile name="debug">-->
+    <!--&lt;!&ndash; 打印sql &ndash;&gt;-->
+    <!--<logger name="org.springframework.scheduling"  level="error" />-->
+    <!--<Logger name="org.apache.catalina.util.LifecycleBase" level="error" />-->
+    <!--<Logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />-->
+    <!--<Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" />-->
+    <!--<Logger name="org.springframework" level="debug" />-->
+    <!--<logger name="com.lzw" level="debug" />-->
+    <!--<logger name="org.mybatis" level="debug" />-->
+    <!--<logger name="java.sql" level="error" />-->
+    <!--<logger name="java.sql.Connection" level="error" />-->
+    <!--<logger name="java.sql.Statement" level="error" />-->
+    <!--<logger name="java.sql.PreparedStatement" level="error" />-->
+    <!--<logger name="java.sql.ResultSet" level="error" />-->
+    <!--<root level="debug">-->
+    <!--<appender-ref ref="CONSOLE"/>-->
+    <!--</root>-->
+    <!--</springProfile>-->
+
+
+</configuration>

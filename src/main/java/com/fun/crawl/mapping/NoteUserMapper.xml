@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fun.crawl.mapper.NoteUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.fun.crawl.model.NoteUser">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="email" property="email"/>
+        <result column="token" property="token"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="main_account" property="mainAccount"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+       id, user_id, username, email, token, create_time, modify_time,main_account
+</sql>
+    <select id="pageByQuery" resultMap="BaseResultMap">
+        select id, user_id, username, email, token, create_time, modify_time,main_account
+        from t_note_user
+        <where>
+            <if test="id !=null and id!=''">
+                and id = #{ id}
+            </if>
+            <if test="userId !=null and userId!=''">
+                and user_id = #{ userId}
+            </if>
+            <if test="username !=null and username!=''">
+                and username = #{ username}
+            </if>
+            <if test="email !=null and email!=''">
+                and email = #{ email}
+            </if>
+            <if test="token !=null and token!=''">
+                and token = #{ token}
+            </if>
+            <if test="createTime !=null and createTime!=''">
+                and create_time = #{ createTime}
+            </if>
+            <if test="modifyTime !=null and modifyTime!=''">
+                and modify_time = #{ modifyTime}
+            </if>
+            <if test="mainAccount !=null and mainAccount!=''">
+                and main_account = #{ mainAccount}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>
