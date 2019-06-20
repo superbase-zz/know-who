@@ -28,10 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
@@ -40,8 +37,7 @@ import java.util.stream.Stream;
 public class YingXiangService {
 
 
-    public static final String AUTH_TOKEN = "S=s33:U=17d5590:E=16b91ba9b4c:C=16b6dae1670:P=1cd:A=en-devtoken:V=2:H=ed72c950aed3ff79dd5d59923153636b";
-
+    public static final String AUTH_TOKEN = "S=s53:U=150a708:E=16b9316930b:C=16b6f0a0c90:P=1cd:A=en-devtoken:V=2:H=9a8c3e34070a6df2a592abaa2e307118";
     private final static ArrayBlockingQueue<Runnable> WORK_QUEUE = new ArrayBlockingQueue<>(100);
 
     private final static RejectedExecutionHandler HANDLER = new ThreadPoolExecutor.CallerRunsPolicy();
@@ -54,6 +50,11 @@ public class YingXiangService {
 
     ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 6, 1, TimeUnit.DAYS, queue);
 
+    private static Map<String,Object> CacheMap=new HashMap<>();
+
+    @Autowired
+    private RedisService redisService;
+
 
     @Autowired
     private NoteUserService noteUserService;
@@ -65,10 +66,9 @@ public class YingXiangService {
 
     public static void main(String[] args) throws EDAMUserException, EDAMSystemException, TException, EDAMNotFoundException {
 
-
-        List guids = new ArrayList();
-        guids.add("c1d43b38-7d85-401e-9f3d-c94dc5356eec");
-        shareNoteBook(AUTH_TOKEN, guids, "wfangliang@foxmail.com");
+//        List<LinkedNotebook> linkedNotebooks = YingXiangService.listLinkNotebook(AUTH_TOKEN);
+//
+//        System.out.println(linkedNotebooks);
 
     }
 
@@ -105,7 +105,9 @@ public class YingXiangService {
             if (StringUtils.isNotBlank(name)) {
                 if (shareName.contains(name)) {
                     log.info("linkedNotebook 名称：" + shareName);
+
                     copyLinkNoteBooksToNewByUser(linkedNotebook, mainUser, flowUser);
+
                 }
             } else {
 //                    copyLinkNoteBooksToNewByUser(linkedNotebook, mainUser, flowUser);
@@ -146,7 +148,7 @@ public class YingXiangService {
      * @param note
      * @return
      */
-    public static int shareNoteBook(String token, List<String> notebookGuids, String email) {
+    public int shareNoteBook(String token, List<String> notebookGuids, String email) {
         NoteStoreClient noteStore = getNoteStore(token);
         List<Notebook> notebooks = null;
         try {
@@ -169,17 +171,16 @@ public class YingXiangService {
             sharedNotebook.setPrivilege(SharedNotebookPrivilegeLevel.READ_NOTEBOOK_PLUS_ACTIVITY);
             try {
 
-                log.info("***分享笔记本***GUID** " +notebookGuid + "***收件人邮箱*** " + email);
+                log.info("***分享笔记本***GUID** " + notebookGuid + "***收件人邮箱*** " + email);
                 SharedNotebook sbsqook = noteStore.createSharedNotebook(sharedNotebook);
                 String notebootkGuis = sbsqook.getNotebookGuid();
 
                 log.info("***发送笔记本提醒***GUID** " + notebootkGuis + "***收件人邮箱*** " + email);
-                List<String> arrlist=new ArrayList<>();
+                List<String> arrlist = new ArrayList<>();
                 arrlist.add(email);
 //                Notebook notebook = noteStore.getNotebook(notebookGuid);
 
 //                noteStore.sendMessageToSharedNotebookMembers(notebookGuid, "笔记已发送,点击链接获取", arrlist);
-
 
 
                 i = ++i;
@@ -389,7 +390,7 @@ public class YingXiangService {
      *
      * @return
      */
-    public static Boolean copyLinkNoteBooksToNew(LinkedNotebook linkedNotebook, String linkToken, String newToken) {
+    public Boolean copyLinkNoteBooksToNew(LinkedNotebook linkedNotebook, String linkToken, String newToken) {
         String bookName = linkedNotebook.getShareName();
         Notebook notebook = new Notebook();
         notebook.setName(bookName);
@@ -557,7 +558,7 @@ public class YingXiangService {
      * @return
      * @throws Exception
      */
-    public static LinkNoteListDto listLinkNote(LinkedNotebook linkedNotebook, String token) {
+    public LinkNoteListDto listLinkNote(LinkedNotebook linkedNotebook, String token) {
         log.info("*****linkedNotebook******笔记本名称：" + linkedNotebook.getShareName());
         String shareKey = linkedNotebook.getShareKey();
         THttpClient tHttpClient = null;
@@ -681,7 +682,7 @@ public class YingXiangService {
      * @return
      * @throws Exception
      */
-    public static List<LinkedNotebook> listLinkNotebook(String token) {
+    public List<LinkedNotebook> listLinkNotebook(String token) {
         try {
             List<LinkedNotebook> linkedNotebooks = getNoteStore(token).listLinkedNotebooks();
             return linkedNotebooks;
@@ -726,11 +727,17 @@ public class YingXiangService {
      * @param auth_token
      * @return
      */
-    public static NoteStoreClient getNoteStore(String auth_token) {
+    public NoteStoreClient getNoteStore(String auth_token) {
+        Object o = CacheMap.get(auth_token);
+        if (o != null) {
+            return (NoteStoreClient) o;
+        }
+
         EvernoteAuth evernoteAuth = new EvernoteAuth(EvernoteService.YINXIANG, auth_token);
         ClientFactory factory = new ClientFactory(evernoteAuth);
         try {
             NoteStoreClient noteStore = factory.createNoteStoreClient();
+            CacheMap.put(auth_token,noteStore);
             return noteStore;
         } catch (EDAMUserException e) {
             e.printStackTrace();
@@ -739,8 +746,16 @@ public class YingXiangService {
 
             }
 
+
+
+
         } catch (EDAMSystemException e) {
             e.printStackTrace();
+            if (e.getErrorCode().name().equals("RATE_LIMIT_REACHED")) {//发送邮箱哦.................
+                int rateLimitDuration = e.getRateLimitDuration();
+                log.error("连接限制...........请"+rateLimitDuration+"s后再试");
+            }
+
         } catch (TException e) {
             e.printStackTrace();
         }

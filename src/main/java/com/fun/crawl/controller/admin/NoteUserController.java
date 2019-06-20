@@ -73,5 +73,15 @@ public class NoteUserController {
     }
 
 
+
+    @SysLog(serviceId = FisherServiceNameConstants.FISHER_USER_SERVICE, moduleName = MODULE_NAME, actionName = "修改印象账号")
+    @ApiOperation(value = "添加印象账号", notes = "添加印象账号", httpMethod = "POST")
+    @ApiImplicitParam(name = "NoteUser", value = "角色信息", required = true, dataType = "NoteUser")
+    @PostMapping
+    public ApiResult<Boolean> add(@RequestBody   NoteUser noteUser){
+        return new ApiResult<>(noteUserService.save(noteUser));
+    }
+
+
 }
 

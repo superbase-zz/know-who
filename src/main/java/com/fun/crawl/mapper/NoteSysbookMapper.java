@@ -9,7 +9,7 @@ import com.fun.crawl.base.mapper.BaseMapper;
  * </p>
  *
  * @author jobob
- * @since 2019-06-11
+ * @since 2019-06-20
  */
 public interface NoteSysbookMapper extends BaseMapper<NoteSysbook> {
 

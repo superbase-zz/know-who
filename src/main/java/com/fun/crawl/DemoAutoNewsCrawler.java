@@ -247,8 +247,8 @@ public class DemoAutoNewsCrawler extends BreadthCrawler {
 
         strategy.setControllerMappingHyphenStyle(true);
         strategy.setEntityTableFieldAnnotationEnable(true);
-        strategy.setTablePrefix("");
-        strategy.setInclude(new String[]{"sys_log"});
+        strategy.setTablePrefix("t_");
+        strategy.setInclude(new String[]{"t_note_sysbook"});
 
 //        strategy.setCapitalMode()
         mpg.setStrategy(strategy);

@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author jobob
- * @since 2019-06-11
+ * @since 2019-06-20
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -35,8 +35,8 @@ public class NoteSysbook implements Serializable {
     /**
      * 笔记本编号
      */
-    @TableField("notebook_id")
-    private String notebookId;
+    @TableField("notebook_guid")
+    private String notebookGuid;
 
     /**
      * 笔记本名称
@@ -45,16 +45,10 @@ public class NoteSysbook implements Serializable {
     private String notebookName;
 
     /**
-     * 笔记本编号
+     * 哪个账号同步
      */
-    @TableField("to_notebook_id")
-    private String toNotebookId;
-
-    /**
-     * 笔记本名称
-     */
-    @TableField("to_notebook_name")
-    private String toNotebookName;
+    @TableField("uid")
+    private Long uid;
 
     /**
      * 是否删除1，已删除

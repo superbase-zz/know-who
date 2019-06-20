@@ -1,6 +1,12 @@
 package com.fun.crawl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.evernote.edam.type.LinkedNotebook;
+import com.fun.crawl.model.NoteSysbook;
+import com.fun.crawl.model.NoteUser;
 import com.fun.crawl.service.FileExtendService;
+import com.fun.crawl.service.NoteSysbookService;
+import com.fun.crawl.service.NoteUserService;
 import com.fun.crawl.service.YingXiangService;
 import com.fun.crawl.base.utils.PanApiService;
 import com.fun.crawl.base.utils.PanCoreUtil;
@@ -10,14 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.fun.crawl.base.utils.PanApiService.creatTxtFile;
-import static com.fun.crawl.base.utils.PanApiService.shrioUrl;
-import static com.fun.crawl.base.utils.PanApiService.writeTxtFile;
+import static com.fun.crawl.base.utils.PanApiService.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -35,6 +42,13 @@ public class CrawlTest {
     public static final String AUTH_TOKEN = "S=s53:U=150a708:E=16b633b594a:C=16b3f2ed410:P=1cd:A=en-devtoken:V=2:H=ae47b61694e4892fa86b5d14692f2d1e";
 
 
+
+    @Autowired
+    private NoteUserService noteUserService;
+
+
+    @Autowired
+    private NoteSysbookService noteSysbookService;
     @Autowired
     private FileExtendService fileExtendService;
 
@@ -50,9 +64,9 @@ public class CrawlTest {
 
     @Test
     public void test1() {
-        YingXiangService.sysNoteBookName("大师课");
-        YingXiangService.sysNoteBookName("樊登读书会");
-        YingXiangService.sysNoteBookName("每天听本书2019");
+//        YingXiangService.sysNoteBookName("大师课");
+//        YingXiangService.sysNoteBookName("樊登读书会");
+//        YingXiangService.sysNoteBookName("每天听本书2019");
 
 
     }
