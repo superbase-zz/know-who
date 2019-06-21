@@ -50,7 +50,7 @@ public class YingXiangService {
 
     ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 6, 1, TimeUnit.DAYS, queue);
 
-    private static Map<String,Object> CacheMap=new HashMap<>();
+    private static Map<String, Object> CacheMap = new HashMap<>();
 
     @Autowired
     private RedisService redisService;
@@ -214,7 +214,13 @@ public class YingXiangService {
         try {
             try {
                 log.info("开始创建笔记本：" + bookName);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 notebook = noteStore.createNotebook(notebook);
+
                 if (dbNoteBook == null) {
                     NoteBook noteBook = new NoteBook();
                     noteBook.setCreateTime(new Date());
@@ -225,6 +231,9 @@ public class YingXiangService {
                     noteBook.setNoteUserId(newTokenUser.getId());
                     noteBookService.save(noteBook);
                 }
+
+
+
             } catch (EDAMUserException e) {
                 System.err.println("Error: " + e.getErrorCode().toString()
                         + " parameter: " + e.getParameter());
@@ -239,8 +248,14 @@ public class YingXiangService {
                     noteBookService.updateById(dbNoteBook);
                 } else {
                     try {
+
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException aa) {
+                            aa.printStackTrace();
+                        }
                         notebooks = noteStore.listNotebooks();
-                        Optional<Notebook> first = notebooks.stream().filter(book -> book.getName().indexOf(bookName) != -1).findFirst();
+                        Optional<Notebook> first = notebooks.stream().filter(book -> book.getName().equals(bookName)).findFirst();
                         boolean present = first.isPresent();
                         if (present) {
                             notebook = first.get();
@@ -299,7 +314,7 @@ public class YingXiangService {
             for (final Note note : notes) {
 
                 if (notesNew != null && notesNew.size() > 0) {
-                    Optional<Note> first = notesNew.stream().filter(thisNote -> thisNote.getTitle().indexOf(note.getTitle()) != -1).findFirst();
+                    Optional<Note> first = notesNew.stream().filter(thisNote -> thisNote.getTitle().equals(note.getTitle())).findFirst();
                     boolean present = first.isPresent();
                     if (present) {
                         Note sysnote = first.get();
@@ -332,6 +347,11 @@ public class YingXiangService {
                     String content = replaceContent(copy);
                     copy.setContent(content);
                     noteStore.createNote(copy);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
 
 
@@ -384,147 +404,6 @@ public class YingXiangService {
         return content;
     }
 
-
-    /**
-     * 复制笔记本中的内容到新的账号
-     *
-     * @return
-     */
-    public Boolean copyLinkNoteBooksToNew(LinkedNotebook linkedNotebook, String linkToken, String newToken) {
-        String bookName = linkedNotebook.getShareName();
-        Notebook notebook = new Notebook();
-        notebook.setName(bookName);
-        NoteStoreClient noteStore = getNoteStore(newToken);
-        try {
-            try {
-                log.info("开始创建笔记本：" + bookName);
-                try {
-                    Thread.currentThread().sleep(2000);
-                } catch (InterruptedException e2) {
-                    e2.printStackTrace();
-                }
-                notebook = noteStore.createNotebook(notebook);
-            } catch (EDAMUserException e) {
-                System.err.println("Error: " + e.getErrorCode().toString()
-                        + " parameter: " + e.getParameter());
-                String string = e.getErrorCode().toString();
-                log.info("笔记本已经存在：" + bookName + "所有笔记本中查找匹配.......");
-                List<Notebook> notebooks = null;
-                try {
-                    notebooks = noteStore.listNotebooks();
-                    Optional<Notebook> first = notebooks.stream().filter(book -> book.getName().indexOf(bookName) != -1).findFirst();
-                    boolean present = first.isPresent();
-                    if (present) {
-                        notebook = first.get();
-                        log.info("笔记本已经存在：" + bookName + "上次更新时间..." + DateUtil.format(new Date(notebook.getServiceUpdated()), DatePattern.NORM_DATETIME_PATTERN));
-                    }
-                } catch (EDAMUserException e1) {
-                    e1.printStackTrace();
-                } catch (EDAMSystemException e1) {
-                    e1.printStackTrace();
-                } catch (TException e1) {
-                    e1.printStackTrace();
-                }
-            } catch (EDAMSystemException e) {
-//                e.printStackTrace();
-                System.err.println("Error: " + e.getErrorCode().toString()
-                        + " parameter: " + e.getMessage());
-                String string = e.getErrorCode().toString();
-                log.info("笔记本已经存在：" + bookName + "所有笔记本中查找匹配.......");
-                List<Notebook> notebooks = null;
-                try {
-                    notebooks = noteStore.listNotebooks();
-                    Optional<Notebook> first = notebooks.stream().filter(book -> book.getName().indexOf(bookName) != -1).findFirst();
-                    boolean present = first.isPresent();
-                    if (present) {
-                        notebook = first.get();
-                        log.info("笔记本已经存在：" + bookName + "上次更新时间..." + DateUtil.format(new Date(notebook.getServiceUpdated()), DatePattern.NORM_DATETIME_PATTERN));
-                    }
-                } catch (EDAMUserException e1) {
-                    e1.printStackTrace();
-                } catch (EDAMSystemException e1) {
-                    e1.printStackTrace();
-                } catch (TException e1) {
-                    e1.printStackTrace();
-                }
-
-            } catch (TException e) {
-                e.printStackTrace();
-            }
-
-            String tonoteBookgUid = notebook.getGuid();
-            NoteFilter noteFilter = new NoteFilter();
-            noteFilter.setOrder(NoteSortOrder.CREATED.getValue());//根据创建时间排序
-            noteFilter.setNotebookGuid(tonoteBookgUid);
-            NoteList newNotes = null;
-            newNotes = noteStore.findNotes(noteFilter, 0, 1000);
-            List<Note> notesNew = newNotes.getNotes();
-            LinkNoteListDto dto = listLinkNote(linkedNotebook, linkToken);
-            if (dto == null) {
-                return false;
-            }
-            NoteStore.Client client = dto.getClient();
-            String authenticationToken = dto.getAuthenticationToken();
-            NoteList noteList = dto.getNoteList();
-            List<Note> notes = noteList.getNotes();
-            NoteAttributes noteAttributes = new NoteAttributes();
-            noteAttributes.setAuthor("知识汇聚团队");
-//            noteAttributes.setSourceURL("kanlem.com");
-            for (final Note note : notes) {
-//                executorService.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                    }
-//                });
-
-//                if (notesNew != null && notesNew.size() > 0) {
-//                    Optional<Note> first = notesNew.stream().filter(thisNote -> thisNote.getTitle().indexOf(note.getTitle()) != -1).findFirst();
-//                    boolean present = first.isPresent();
-//                    if (present) {
-//                        Note sysnote = first.get();
-//                        //获取数据更新了，需要重新同步数据的笔记
-//                        log.info("笔记本：" + linkedNotebook.getShareName() + "标题：" + sysnote.getTitle() + "------sysnote更新时间：" + sysnote.getUpdated() + "------note更新时间：" + note.getUpdated());
-//                        if (sysnote.getUpdated() < note.getUpdated()) {
-//                            Note copy = client.getNote(authenticationToken, note.getGuid(), true, true, true, true);
-//                            sysnote.setResources(copy.getResources());
-//                            sysnote.setTitle(copy.getTitle());
-//                            String content = replaceContent(copy);
-//                            sysnote.setContent(content);
-//                            sysnote.setUpdated(note.getUpdated());
-//                            noteStore.updateNote(sysnote);
-//                        }
-//                    } else {
-//                        log.info("笔记本：" + linkedNotebook.getShareName() + "******创建笔记*********标题：" + note.getTitle());
-//                        Note copy = client.getNote(authenticationToken, note.getGuid(), true, true, true, true);
-//                        copy.setAttributes(noteAttributes);
-//                        copy.setNotebookGuid(tonoteBookgUid);
-//                        String content = replaceContent(copy);
-//                        copy.setContent(content);
-//                        noteStore.createNote(copy);
-//                    }
-//                } else {
-//                    log.info("笔记本：" + linkedNotebook.getShareName() + "******创建笔记*********标题：" + note.getTitle());
-//                    Note copy = client.getNote(authenticationToken, note.getGuid(), true, true, true, true);
-//                    copy.setAttributes(noteAttributes);
-//                    copy.setNotebookGuid(tonoteBookgUid);
-//                    String content = replaceContent(copy);
-//                    copy.setContent(content);
-//                    noteStore.createNote(copy);
-//
-//                }
-            }
-        } catch (EDAMUserException e) {
-            e.printStackTrace();
-        } catch (EDAMSystemException e) {
-            e.printStackTrace();
-        } catch (EDAMNotFoundException e) {
-            e.printStackTrace();
-        } catch (TException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
 
     /**
@@ -617,6 +496,12 @@ public class YingXiangService {
      * @throws EDAMNotFoundException
      */
     public static NoteList ListAllLinkNotes(NoteStore.Client client, String authenticationToken, NoteFilter noteFilter, List<Note> notes) throws EDAMUserException, EDAMSystemException, TException, EDAMNotFoundException {
+        try {
+            Thread.currentThread().sleep(1000);
+        } catch (InterruptedException e2) {
+            e2.printStackTrace();
+        }
+
         if (notes == null || notes.size() <= 0) {
             notes = new ArrayList<>();
             NoteList noteList = client.findNotes(authenticationToken, noteFilter, 0, 50);
@@ -653,6 +538,13 @@ public class YingXiangService {
      * @throws EDAMNotFoundException
      */
     public static NoteList ListAllNotes(NoteStoreClient noteStore, NoteFilter noteFilter, List<Note> notes) throws EDAMUserException, EDAMSystemException, TException, EDAMNotFoundException {
+
+        try {
+            Thread.currentThread().sleep(1000);
+        } catch (InterruptedException e2) {
+            e2.printStackTrace();
+        }
+
         if (notes == null || notes.size() <= 0) {
             notes = new ArrayList<>();
             NoteList noteList = noteStore.findNotes(noteFilter, 0, 50);
@@ -737,7 +629,7 @@ public class YingXiangService {
         ClientFactory factory = new ClientFactory(evernoteAuth);
         try {
             NoteStoreClient noteStore = factory.createNoteStoreClient();
-            CacheMap.put(auth_token,noteStore);
+            CacheMap.put(auth_token, noteStore);
             return noteStore;
         } catch (EDAMUserException e) {
             e.printStackTrace();
@@ -747,13 +639,11 @@ public class YingXiangService {
             }
 
 
-
-
         } catch (EDAMSystemException e) {
             e.printStackTrace();
             if (e.getErrorCode().name().equals("RATE_LIMIT_REACHED")) {//发送邮箱哦.................
                 int rateLimitDuration = e.getRateLimitDuration();
-                log.error("连接限制...........请"+rateLimitDuration+"s后再试");
+                log.error("连接限制...........请" + rateLimitDuration + "s后再试");
             }
 
         } catch (TException e) {

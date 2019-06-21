@@ -1,6 +1,6 @@
 #tomacat相关配置
 server:
-  port: 9002
+  port: 9005
   tomcat:
     max-threads: 500 # Maximum amount of worker threads.
     min-spare-threads: 50 # Minimum amount of worker threads
@@ -11,10 +11,10 @@ spring:
 
   #数据源配置
   datasource:
-    url: jdbc:mysql://localhost:3306/baidu?useUnicode=true&characterEncoding=UTF8&useSSL=false&autoReconnect=true
+    url: jdbc:mysql://118.24.45.162:3306/baidu?useUnicode=true&characterEncoding=UTF8&useSSL=false&autoReconnect=true
     driver-class-name: com.mysql.jdbc.Driver
-    username: root
-    password: 123456
+    username: baidu
+    password: rceLLkCJWNeG483c
 #    hikari:
 #      minimum-idle: 0
 

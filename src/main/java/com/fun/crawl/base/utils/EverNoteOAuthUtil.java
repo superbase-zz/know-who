@@ -16,10 +16,10 @@ public class EverNoteOAuthUtil {
     static final String CONSUMER_KEY = "zhishihuiju";
     static final String CONSUMER_SECRET = "1a43a041e38ac857";
     static final EvernoteService EVERNOTE_SERVICE = EvernoteService.YINXIANG;
-    static final String CALLBACK_URL = "https://supernote.com.cn/";
+    static final String CALLBACK_URL = "https://127.0.0.1:9002/";
 
     public static OAuthService oAuthService( ) {
-        String thisUrl = "https://supernote.com.cn/";
+
         //String thisUrl = request.getRequestURL().toString();
         String cbUrl =  CALLBACK_URL;
 
@@ -51,7 +51,6 @@ public class EverNoteOAuthUtil {
         String oauthToken = requestToken.getToken();
         String oauthTokenSecret = requestToken.getSecret();
         String authUrl = service.getAuthorizationUrl(requestToken);
-        System.out.println(authUrl);
         Map<String, String> requestMap = new HashMap<String, String>();
         requestMap.put("oauthToken", oauthToken);
         requestMap.put("oauthTokenSecret", oauthTokenSecret);
@@ -90,10 +89,21 @@ public class EverNoteOAuthUtil {
 
     public static void main(String[] args) {
 
-        OAuthService oAuthService = oAuthService();
-        System.out.println("token"+oAuthService.getRequestToken().getToken());
-        System.out.println("secret"+oAuthService.getRequestToken().getSecret());
-        System.out.println("URL"+oAuthService.getAuthorizationUrl(oAuthService.getRequestToken()));
+        Map<String, String> requestToken = getRequestToken();
+
+        String oauthToken=requestToken.get("oauthToken");
+        String oauthTokenSecret=requestToken.get("oauthTokenSecret");
+        String authUrl=requestToken.get("authUrl");
+
+
+        System.out.println("token   :"+oauthToken);
+        System.out.println("secret   :"+oauthTokenSecret);
+        System.out.println("URL   :"+authUrl);
+//        https://127.0.0.1:9002/?oauth_token=zhishihuiju.16B78BEACC2.68747470733A2F2F3132372E302E302E313A393030322F.E85DFC56F5F8244D951307E09BB73B03&oauth_verifier=F6A91534AFA5764884A1288D178C3173&sandbox_lnb=false
+//        String url="https://127.0.0.1:9002/?oauth_token=zhishihuiju.16B77D96E61.68747470733A2F2F3132372E302E302E313A393030322F.C62A49B08688F2CEACC657E8D6A42201&oauth_verifier=A8EAD1D3F62657167C6E9E6D27A3D6F9&sandbox_lnb=false";
+//
+        Map<String, String> res = getAccessToken("zhishihuiju.16B78BEACC2.68747470733A2F2F3132372E302E302E313A393030322F.E85DFC56F5F8244D951307E09BB73B03", "177B1804555E1E2DD5CCD8ECF8381AAB", "F6A91534AFA5764884A1288D178C3173");
+        System.out.println(res);
 
     }
 }
